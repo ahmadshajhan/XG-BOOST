@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+    --background: #000000;
+    --foreground: #ffffff;
+}
+
+body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: var(--font-geist-mono), monospace;
+    overflow-x: hidden;
+}
+
+@layer utilities {
+    .neon-text {
+        text-shadow: 0 0 10px rgba(0, 255, 148, 0.5);
+    }
+
+    .glass-panel {
+        @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-xl;
+    }
+}
