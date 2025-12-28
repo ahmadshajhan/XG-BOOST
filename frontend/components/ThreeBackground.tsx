@@ -72,7 +72,7 @@ function ParticleFlow(props: { zoom?: boolean }) {
 export default function ThreeBackground({ zoom = false }: ThreeBackgroundProps) {
     return (
         <div className="fixed inset-0 -z-10 bg-black">
-            <Canvas camera={{ position: [0, 0, 3], fov: 75 }}>
+            <Canvas camera={{ position: [0, 0, 3], fov: 75 }} dpr={[1, 2]} performance={{ min: 0.5 }}>
                 <color attach="background" args={['#000000']} />
                 <ParticleFlow zoom={zoom} />
             </Canvas>

@@ -12,10 +12,17 @@ export default function RedirectPage() {
     const slug = params?.slug as string;
     const intent = searchParams.get('intent') || '';
 
-    const [status, setStatus] = useState<'analyzing' | 'connecting' | 'redirecting' | 'error'>('analyzing');
+    const [status, setStatus] = useState<'analyzing' | 'connecting' | 'redirecting' | 'error' | 'manual'>('analyzing');
     const [errorMsg, setErrorMsg] = useState('');
+    const [targetUrl, setTargetUrl] = useState('');
+    const [isInstagram, setIsInstagram] = useState(false);
 
     useEffect(() => {
+        // UA Detection
+        const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+        const isInsta = (ua.indexOf('Instagram') > -1) || (ua.indexOf('FBAN') > -1) || (ua.indexOf('FBAV') > -1);
+        setIsInstagram(isInsta);
+
         const initRedirect = async () => {
             try {
                 // Stay on "analyzing" for dramatic effect
@@ -26,14 +33,25 @@ export default function RedirectPage() {
                     params: {
                         slug,
                         intent,
-                        device: 'mobile' // In prod, use a hook to detect this
+                        device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+                        source: isInsta ? 'instagram' : 'direct'
                     }
                 });
 
                 if (res.data.success) {
+                    setTargetUrl(res.data.targetUrl);
                     await new Promise(r => setTimeout(r, 800)); // "Connecting..."
-                    setStatus('redirecting');
-                    window.location.href = res.data.targetUrl;
+
+                    if (isInsta) {
+                        // Instagram Block: Show Manual Button + Try Deep Link
+                        setStatus('manual');
+                        // Attempt deep link
+                        const deepLink = res.data.targetUrl.replace('https://wa.me/', 'whatsapp://send?phone=');
+                        window.location.href = deepLink;
+                    } else {
+                        setStatus('redirecting');
+                        window.location.href = res.data.targetUrl;
+                    }
                 } else {
                     setStatus('error');
                     setErrorMsg('Campaign invalid or expired.');
@@ -77,15 +95,16 @@ export default function RedirectPage() {
                 />
             </div>
 
-            <div className="z-10 flex flex-col items-center space-y-8">
+            <div className="z-10 flex flex-col items-center space-y-8 p-4 w-full max-w-md">
                 <div className="w-16 h-16 bg-black border border-neon-green rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(0,255,148,0.4)] relative">
                     <ShieldCheck className="text-neon-green w-8 h-8" />
-                    {/* Spinner Ring */}
-                    <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-0 border-t-2 border-neon-green rounded-full w-full h-full"
-                    />
+                    {status !== 'manual' && (
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            className="absolute inset-0 border-t-2 border-neon-green rounded-full w-full h-full"
+                        />
+                    )}
                 </div>
 
                 <div className="text-center space-y-2">
@@ -93,11 +112,23 @@ export default function RedirectPage() {
                         {status === 'analyzing' && 'ANALYZING ROUTE...'}
                         {status === 'connecting' && 'CONNECTING AGENT...'}
                         {status === 'redirecting' && 'REDIRECTING...'}
+                        {status === 'manual' && 'CLICK TO OPEN'}
                     </h2>
                     <p className="text-xs text-gray-500 uppercase tracking-widest">
-                        Secure Encryption Active
+                        {status === 'manual' ? 'Instagram Browser Detected' : 'Secure Encryption Active'}
                     </p>
                 </div>
+
+                {status === 'manual' && (
+                    <motion.a
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        href={targetUrl}
+                        className="w-full py-4 bg-neon-green text-black font-bold text-lg rounded-lg shadow-[0_0_20px_rgba(0,255,148,0.4)] text-center block hover:scale-105 transition-transform"
+                    >
+                        OPEN WHATSAPP NOW
+                    </motion.a>
+                )}
             </div>
         </div>
     );

@@ -10,6 +10,7 @@ export async function GET(req: Request) {
         const slug = searchParams.get('slug');
         const intent = searchParams.get('intent') || '';
         const device = searchParams.get('device') || 'unknown';
+        const source = searchParams.get('source') || 'direct';
 
         if (!slug) {
             return NextResponse.json({ success: false, error: 'Slug required' }, { status: 400 });
@@ -51,6 +52,7 @@ export async function GET(req: Request) {
         await Lead.create({
             campaignSlug: slug,
             device,
+            source,
             redirectUrl: finalUrl
         });
 
