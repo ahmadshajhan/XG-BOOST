@@ -27,8 +27,6 @@ function ParticleFlow(props: { zoom?: boolean }) {
         setParticles(positions);
     }, []);
 
-    if (!particles) return null;
-
     useFrame((state) => {
         if (ref.current) {
             // Slow rotation
@@ -55,16 +53,18 @@ function ParticleFlow(props: { zoom?: boolean }) {
 
     return (
         <group rotation={[0, 0, Math.PI / 4]}>
-            <Points ref={ref} positions={particles} stride={3} frustumCulled={false} {...props}>
-                <PointMaterial
-                    transparent
-                    color="#00FF94" // Neon Green
-                    size={0.012}
-                    sizeAttenuation={true}
-                    depthWrite={false}
-                    opacity={0.8}
-                />
-            </Points>
+            {particles && (
+                <Points ref={ref} positions={particles} stride={3} frustumCulled={false} {...props}>
+                    <PointMaterial
+                        transparent
+                        color="#00FF94" // Neon Green
+                        size={0.012}
+                        sizeAttenuation={true}
+                        depthWrite={false}
+                        opacity={0.8}
+                    />
+                </Points>
+            )}
         </group>
     );
 }
