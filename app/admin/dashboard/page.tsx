@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, BarChart2, Link as LinkIcon, Trash, Copy, Check, PlusCircle, X, LogOut } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
 import { GlassCard } from '@/components/ui/GlassCard';
 import DashboardCharts from '@/components/DashboardCharts';
 import { signOut, useSession } from 'next-auth/react';
@@ -35,7 +35,7 @@ export default function AdminDashboard() {
     const fetchCampaigns = async () => {
         try {
             const res = await axios.get('/api/campaign/list');
-            setCampaigns(res.data.data);
+            setCampaigns(Array.isArray(res.data.data) ? res.data.data : []);
         } catch (err) {
             console.error(err);
         }
