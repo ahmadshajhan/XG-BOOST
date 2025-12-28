@@ -34,6 +34,7 @@ export default function LoginPage() {
             // Success! Trigger Warp Speed
             setZoomEffect(true);
             setTimeout(() => {
+                router.refresh(); // Update server session state
                 router.push('/admin/dashboard');
             }, 1500); // Wait for zoom effect
         }
